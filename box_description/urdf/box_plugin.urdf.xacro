@@ -1,6 +1,6 @@
 <robot name="box_plugin" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="$(find box_description)/urdf/box_plugin.xacro"/>
-  <xacro:ball_plugin box="box"/>
+  <xacro:box_plugin box="box"/>
 
 </robot>

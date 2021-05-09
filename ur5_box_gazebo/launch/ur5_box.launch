@@ -6,7 +6,7 @@
   
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" default="worlds/empty.world"/>
+    <arg name="world_name" default="$(find ur5_box_gazebo)/worlds/ur5_with_box.world"/>
     <arg name="paused" value="$(arg paused)"/>
     <arg name="gui" value="$(arg gui)"/>
   </include>
@@ -17,7 +17,7 @@
   </include>
 
   <!-- send box plugin to param server -->
-  <include file="$(find box_description)/launch/box_upload.launch">
+  <include file="$(find box_description)/launch/box_upload.launch"/>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_gazebo_robot_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.1" respawn="false" output="screen" />
