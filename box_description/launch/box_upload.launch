@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="box_description"
+         command="$(find xacro)/xacro --inorder '$(find box_description)/urdf/box_plugin.urdf.xacro'"/>
+
+</launch>

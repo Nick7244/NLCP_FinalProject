@@ -1,0 +1,17 @@
+<robot name="box_plugin" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="box_plugin" params="box">
+    
+        <link name="box_plugin_link"/>
+
+        <gazebo>
+            <plugin name="box_plugin" filename="libbox_plugin.so">
+                <rosDebugLevel>3</rosDebugLevel>
+                <box>${box}</box>
+            </plugin>
+        </gazebo>
+
+    </xacro:macro>
+
+
+</robot>
