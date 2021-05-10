@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(box_position_subscriber)
+project(ur5_box_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,8 +8,14 @@ project(box_position_subscriber)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ur5_box_msgs
+  kdl_parser
   roscpp
+  rtt_ros
+  rtt_rosnode
+  rtt_rosparam
+  rtt_std_msgs
+  ur5_box_msgs
+  trajectory_seed_generator
 )
 
 ## System dependencies are found with CMake's conventions
@@ -69,7 +75,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   ur5_box_msgs
+#   rtt_std_msgs#   ur5_box_msgs
 # )
 
 ################################################
@@ -102,9 +108,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES box_pos_sub
-#  CATKIN_DEPENDS roscpp ur5_box_msgs
+#  INCLUDE_DIRS include
+#  LIBRARIES ur5_box_control
+#  CATKIN_DEPENDS kdl_parser roscpp rtt_ros rtt_rosnode rtt_rosparam rtt_std_msgs ur5_box_msgs
 #  DEPENDS system_lib
 )
 
@@ -119,27 +125,17 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-add_library( box_pos_sub
-  src/box_position_subscriber.cpp
+orocos_component( ur5_box_control 
+  src/ur5_control.cpp
 )
 
-add_executable( box_pos_sub_node 
-  src/box_position_subscriber_node.cpp
-)
-
-target_link_libraries(box_pos_sub
+target_link_libraries(ur5_box_control
   ${catkin_LIBRARIES}
-)
-
-target_link_libraries(box_pos_sub_node 
-  ${catkin_LIBRARIES}
-  box_pos_sub
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/box_position_subscriber.cpp
+#   src/${PROJECT_NAME}/ur5_box_control.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -150,7 +146,7 @@ target_link_libraries(box_pos_sub_node
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/box_position_subscriber_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/ur5_box_control_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -214,7 +210,7 @@ target_link_libraries(box_pos_sub_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_box_position_subscriber.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_ur5_box_control.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

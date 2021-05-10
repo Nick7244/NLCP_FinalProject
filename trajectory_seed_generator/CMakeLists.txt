@@ -104,9 +104,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES trajectory_seed_generator
-#  CATKIN_DEPENDS box_position_subscriber kdl_parser roscpp
+  INCLUDE_DIRS include
+  LIBRARIES trajectory_seed_generator
+  CATKIN_DEPENDS box_position_subscriber
 #  DEPENDS system_lib
 )
 
@@ -117,14 +117,18 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/trajectory_seed_generator.cpp
-# )
+add_library( trajectory_seed_generator 
+  src/ur5_reflexxes_trajectory.cpp
+)
+
+target_link_libraries(trajectory_seed_generator
+  ${catkin_LIBRARIES}
+  ReflexxesTypeII
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

@@ -1,6 +1,13 @@
-std_msgs/Float64MultiArray x_trajectory
-std_msgs/Float64MultiArray x_dot_trajectory
-std_msgs/Float64MultiArray y_trajectory
-std_msgs/Float64MultiArray y_dot_trajectory
-std_msgs/Float64MultiArray z_trajectory
-std_msgs/Float64MultiArray z_dot_trajectory
+std_msgs/Float64MultiArray q1_trajectory
+std_msgs/Float64MultiArray q2_trajectory
+std_msgs/Float64MultiArray q3_trajectory
+std_msgs/Float64MultiArray q4_trajectory
+std_msgs/Float64MultiArray q5_trajectory
+std_msgs/Float64MultiArray q6_trajectory
+
+std_msgs/Float64MultiArray q1_dot_trajectory
+std_msgs/Float64MultiArray q2_dot_trajectory
+std_msgs/Float64MultiArray q3_dot_trajectory
+std_msgs/Float64MultiArray q4_dot_trajectory
+std_msgs/Float64MultiArray q5_dot_trajectory
+std_msgs/Float64MultiArray q6_dot_trajectory

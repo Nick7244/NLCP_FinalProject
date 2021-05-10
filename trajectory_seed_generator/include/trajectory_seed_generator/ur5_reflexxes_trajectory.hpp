@@ -12,7 +12,7 @@
 #include <ReflexxesTypeII/RMLPositionInputParameters.h>
 #include <ReflexxesTypeII/RMLPositionOutputParameters.h>
 
-#include <box_position_subscriber/box_position_subscriber.hpp>
+#include <box_position_subscriber/box_position_subscriber.hpp> 
 
 class ur5_reflexxes_trajectory {
 
@@ -22,7 +22,7 @@ class ur5_reflexxes_trajectory {
         ros::Subscriber sub_js;
         ros::Publisher pub_traj;
 
-        ReflexxesAPI *rml;
+        ReflexxesAPI* rml;
         RMLPositionInputParameters* ip;
         RMLPositionOutputParameters* op;
         RMLPositionFlags flags;
@@ -30,19 +30,23 @@ class ur5_reflexxes_trajectory {
         KDL::Tree tree;
         KDL::Chain chain;
         KDL::ChainFkSolverPos* fk_pos;
+        KDL::ChainIkSolverPos* ik_pos;
+        KDL::ChainIkSolverVel* ik_vel;
 
         KDL::JntArray joint_state;
 
-        box_position_subscriber box_pos_sub;
+        box_pos_subscriber box_pos_sub;
 
-        int result;
+        void computeTrajectory();
 
     public:
 
-        ur5_reflexxes_trajectory( ros::NodeHandle& nh );
+        ur5_reflexxes_trajectory( ros::NodeHandle& nh, float controllerPeriod );
         ~ur5_reflexxes_trajectory() {};
 
-        void generateTrajectory();
+        void generateSeedTrajectory();
+        void TPoseTrajectory();
+
         void jointStateCallback(const sensor_msgs::JointState& js );
 
 };
