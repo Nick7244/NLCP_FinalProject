@@ -1,0 +1,6 @@
+std_msgs/Float64MultiArray x_trajectory
+std_msgs/Float64MultiArray x_dot_trajectory
+std_msgs/Float64MultiArray y_trajectory
+std_msgs/Float64MultiArray y_dot_trajectory
+std_msgs/Float64MultiArray z_trajectory
+std_msgs/Float64MultiArray z_dot_trajectory

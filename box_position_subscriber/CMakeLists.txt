@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(box_plugin)
+project(box_position_subscriber)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,16 +9,11 @@ project(box_plugin)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   ur5_box_msgs
-  gazebo_dev
-  gazebo_plugins
-  gazebo_ros
   roscpp
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Gazebo REQUIRED)
-
-find_package(Boost REQUIRED COMPONENTS thread)
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -107,9 +102,9 @@ find_package(Boost REQUIRED COMPONENTS thread)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES box_plugin
-#  CATKIN_DEPENDS ur5_box_msgs gazebo_dev gazebo_plugins gazebo_ros roscpp
+  INCLUDE_DIRS include
+  LIBRARIES box_pos_sub
+#  CATKIN_DEPENDS roscpp ur5_kendama_msgs
 #  DEPENDS system_lib
 )
 
@@ -121,20 +116,31 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  ${Boost_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(box_plugin 
-  src/box_plugin.cpp
+add_library( box_pos_sub
+  src/box_position_subscriber.cpp
 )
 
-target_link_libraries(box_plugin 
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
+add_executable( box_pos_sub_node 
+  src/box_position_subscriber_node.cpp
 )
+
+target_link_libraries(box_pos_sub
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(box_pos_sub_node 
+  ${catkin_LIBRARIES}
+  box_pos_sub
+)
+
+## Declare a C++ library
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/box_position_subscriber.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -144,7 +150,7 @@ target_link_libraries(box_plugin
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/box_plugin_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/box_position_subscriber_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -208,7 +214,7 @@ target_link_libraries(box_plugin
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_box_plugin.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_box_position_subscriber.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

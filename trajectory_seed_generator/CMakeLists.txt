@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(box_plugin)
+project(trajectory_seed_generator)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,17 +8,14 @@ project(box_plugin)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ur5_box_msgs
-  gazebo_dev
-  gazebo_plugins
-  gazebo_ros
+  box_position_subscriber
+  kdl_parser
   roscpp
+  ur5_box_msgs
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Gazebo REQUIRED)
-
-find_package(Boost REQUIRED COMPONENTS thread)
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -74,7 +71,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   ur5_box_msgs
+#   std_msgs  # Or other packages containing msgs
 # )
 
 ################################################
@@ -108,8 +105,8 @@ find_package(Boost REQUIRED COMPONENTS thread)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES box_plugin
-#  CATKIN_DEPENDS ur5_box_msgs gazebo_dev gazebo_plugins gazebo_ros roscpp
+#  LIBRARIES trajectory_seed_generator
+#  CATKIN_DEPENDS box_position_subscriber kdl_parser roscpp
 #  DEPENDS system_lib
 )
 
@@ -120,21 +117,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
-  ${Boost_INCLUDE_DIR}
+# include
   ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(box_plugin 
-  src/box_plugin.cpp
-)
-
-target_link_libraries(box_plugin 
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/trajectory_seed_generator.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -144,7 +134,7 @@ target_link_libraries(box_plugin
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/box_plugin_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/trajectory_seed_generator_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -208,7 +198,7 @@ target_link_libraries(box_plugin
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_box_plugin.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_trajectory_seed_generator.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
