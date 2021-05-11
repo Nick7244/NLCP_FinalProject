@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
+  <node name="spawn_gazebo_box_2" pkg="gazebo_ros" type="spawn_model" args="-database cardboard_box -sdf -model box -y 0.75 -x 0.4 -z 2.0" respawn="false" output="screen" />
+
   <param name="box_description"
          command="$(find xacro)/xacro --inorder '$(find box_description)/urdf/box_plugin.urdf.xacro'"/>
 

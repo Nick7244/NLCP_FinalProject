@@ -6,7 +6,7 @@
   
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" default="$(find ur5_box_gazebo)/worlds/ur5_with_box.world"/>
+    <arg name="world_name" default="worlds/empty.world"/>
     <arg name="paused" value="$(arg paused)"/>
     <arg name="gui" value="$(arg gui)"/>
   </include>
@@ -16,13 +16,14 @@
     <arg name="limited" value="$(arg limited)"/>
   </include>
 
-  <!-- send box plugin to param server -->
+  <!-- spawn robot and table -->
+  <node name="spawn_gazebo_table" pkg="gazebo_ros" type="spawn_model" args="-database cafe_table -sdf -model table -y 0.35 -x 0.3" respawn="false" output="screen" />
+  <node name="spawn_gazebo_robot_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.78" respawn="false" output="screen" />
+  
+  <!-- spawn box and send box plugin to param server -->
   <include file="$(find box_description)/launch/box_upload.launch"/>
-
-  <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="spawn_gazebo_robot_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.1" respawn="false" output="screen" />
-  <node name="spawn_gazebo_box_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param box_description -model box_plugin" respawn="false" output="screen" />
-
+  
+  <!-- load controller config file -->
   <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
 
   <!-- start this controller -->

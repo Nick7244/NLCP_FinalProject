@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node name="spawn_gazebo_box_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param box_description -model box_plugin" respawn="false" output="screen" />
+
+</launch>

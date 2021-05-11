@@ -4,9 +4,6 @@
 #include <kdl/chainiksolvervel_pinv.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 
-#include <std_msgs/Float64MultiArray.h>
-#include <ur5_box_msgs/ur5_trajectory.h>
-
 #include <vector>
 
 ur5_reflexxes_trajectory::ur5_reflexxes_trajectory( ros::NodeHandle& nh, float controllerPeriod )
@@ -63,9 +60,9 @@ ur5_reflexxes_trajectory::ur5_reflexxes_trajectory( ros::NodeHandle& nh, float c
         ip->CurrentVelocityVector->VecData[i] = 0.0;
         ip->CurrentAccelerationVector->VecData[i] = 0.0;
 
-        ip->MaxVelocityVector->VecData[i] = 0.5;
-        ip->MaxAccelerationVector->VecData[i] = 0.75;
-        ip->MaxJerkVector->VecData[i] = 1.0;
+        ip->MaxVelocityVector->VecData[i] = 0.0;
+        ip->MaxAccelerationVector->VecData[i] = 0.0;
+        ip->MaxJerkVector->VecData[i] = 0.0;
 
         ip->SelectionVector->VecData[i] = true;
 
@@ -75,23 +72,14 @@ ur5_reflexxes_trajectory::ur5_reflexxes_trajectory( ros::NodeHandle& nh, float c
 }
 
 
-void ur5_reflexxes_trajectory::computeTrajectory()
+void ur5_reflexxes_trajectory::computeTrajectory( std_msgs::Float64MultiArray& q1_traj, 
+    std_msgs::Float64MultiArray& q2_traj, std_msgs::Float64MultiArray& q3_traj, 
+    std_msgs::Float64MultiArray& q4_traj, std_msgs::Float64MultiArray& q5_traj, 
+    std_msgs::Float64MultiArray& q6_traj, std_msgs::Float64MultiArray& q1_dot_traj, 
+    std_msgs::Float64MultiArray& q2_dot_traj, std_msgs::Float64MultiArray& q3_dot_traj, 
+    std_msgs::Float64MultiArray& q4_dot_traj, std_msgs::Float64MultiArray& q5_dot_traj, 
+    std_msgs::Float64MultiArray& q6_dot_traj )
 {
-    // Declare trajectory variables
-    std_msgs::Float64MultiArray q1_traj;
-    std_msgs::Float64MultiArray q2_traj;
-    std_msgs::Float64MultiArray q3_traj;
-    std_msgs::Float64MultiArray q4_traj;
-    std_msgs::Float64MultiArray q5_traj;
-    std_msgs::Float64MultiArray q6_traj;
-
-    std_msgs::Float64MultiArray q1_dot_traj;
-    std_msgs::Float64MultiArray q2_dot_traj;
-    std_msgs::Float64MultiArray q3_dot_traj;
-    std_msgs::Float64MultiArray q4_dot_traj;
-    std_msgs::Float64MultiArray q5_dot_traj;
-    std_msgs::Float64MultiArray q6_dot_traj;
-
     int result = 0;
 
     // Compute trajectory
@@ -132,27 +120,13 @@ void ur5_reflexxes_trajectory::computeTrajectory()
     q3_dot_traj.data.push_back(ip->CurrentVelocityVector->VecData[2]);
     q4_dot_traj.data.push_back(ip->CurrentVelocityVector->VecData[3]);
     q5_dot_traj.data.push_back(ip->CurrentVelocityVector->VecData[4]);
-    q6_dot_traj.data.push_back(ip->CurrentVelocityVector->VecData[5]);
+    q6_dot_traj.data.push_back(ip->CurrentVelocityVector->VecData[5]);    
+}
 
-    // Create trajectory message
-    ur5_box_msgs::ur5_trajectory trajectoryMsg;
-    trajectoryMsg.q1_trajectory = q1_traj;
-    trajectoryMsg.q2_trajectory = q2_traj;
-    trajectoryMsg.q3_trajectory = q3_traj;
-    trajectoryMsg.q4_trajectory = q4_traj;
-    trajectoryMsg.q5_trajectory = q5_traj;
-    trajectoryMsg.q6_trajectory = q6_traj;
 
-    trajectoryMsg.q1_dot_trajectory = q1_traj;
-    trajectoryMsg.q2_dot_trajectory = q2_traj;
-    trajectoryMsg.q3_dot_trajectory = q3_traj;
-    trajectoryMsg.q4_dot_trajectory = q4_traj;
-    trajectoryMsg.q5_dot_trajectory = q5_traj;
-    trajectoryMsg.q6_dot_trajectory = q6_traj;
-
+void ur5_reflexxes_trajectory::publishTrajectory( ur5_box_msgs::ur5_trajectory trajectoryMsg )
+{
     ROS_INFO("Trajectory successfully generated, publishing to topic...");
-
-    // Publish trajectory
     pub_traj.publish(trajectoryMsg);
 }
 
@@ -164,20 +138,20 @@ void ur5_reflexxes_trajectory::generateSeedTrajectory()
     KDL::Frame p_cur;
     fk_pos->JntToCart(q_cur, p_cur, -1);
 
-
-
-
-
     // Obtain box position
     std::vector<float> box_pos = box_pos_sub.getBoxPos();
     
-    // Compute  position of being underneath the box
-    KDL::Frame p_desired = p_cur;
-    KDL::Vector desired_pos(box_pos[0], box_pos[1], box_pos[2]);
-    p_desired.p = desired_pos;
-    //p_desired.M = robotOrientation;
+    // Compute desired end-effector position based on box position
+    // First portion of trajectory will place end-effector just in front of box
+    KDL::Rotation rotation_transform = KDL::Rotation::RPY(0.0, 1.5708, 0.0);
+    KDL::Rotation desired_orientation = p_cur.M * rotation_transform;
+    KDL::Vector desired_pos(box_pos[0], box_pos[1] - 0.2, box_pos[2] - 0.78);
 
-    // Compute inverse kinematics to box x-y position
+    KDL::Frame p_desired;
+    p_desired.p = desired_pos;
+    p_desired.M = desired_orientation;
+
+    // Compute inverse kinematics to desired position
     KDL::JntArray q_desired(6);
     ik_pos->CartToJnt(q_cur, p_desired, q_desired);
 
@@ -188,6 +162,59 @@ void ur5_reflexxes_trajectory::generateSeedTrajectory()
     ip->CurrentPositionVector->VecData[3] = joint_state.data[3];
     ip->CurrentPositionVector->VecData[4] = joint_state.data[4];
     ip->CurrentPositionVector->VecData[5] = joint_state.data[5];
+
+    // Set desired point of trajectory to the desired position
+    ip->TargetPositionVector->VecData[0] = q_desired.data[0];
+    ip->TargetPositionVector->VecData[1] = q_desired.data[1];
+    ip->TargetPositionVector->VecData[2] = q_desired.data[2];
+    ip->TargetPositionVector->VecData[3] = q_desired.data[3];
+    ip->TargetPositionVector->VecData[4] = q_desired.data[4];
+    ip->TargetPositionVector->VecData[5] = q_desired.data[5];
+
+    for ( int i = 0; i < 6; i++ )
+    {
+        ip->TargetVelocityVector->VecData[i] = 0.0;
+    }
+
+    // Define kinematic limits
+    for ( int i = 0; i < 6; i++ )
+    {
+        ip->MaxVelocityVector->VecData[i] = 1.0;
+        ip->MaxAccelerationVector->VecData[i] = 50;
+        ip->MaxJerkVector->VecData[i] = 100;
+    }
+
+    // Declare trajectory variables
+    std_msgs::Float64MultiArray q1_traj;
+    std_msgs::Float64MultiArray q2_traj;
+    std_msgs::Float64MultiArray q3_traj;
+    std_msgs::Float64MultiArray q4_traj;
+    std_msgs::Float64MultiArray q5_traj;
+    std_msgs::Float64MultiArray q6_traj;
+
+    std_msgs::Float64MultiArray q1_dot_traj;
+    std_msgs::Float64MultiArray q2_dot_traj;
+    std_msgs::Float64MultiArray q3_dot_traj;
+    std_msgs::Float64MultiArray q4_dot_traj;
+    std_msgs::Float64MultiArray q5_dot_traj;
+    std_msgs::Float64MultiArray q6_dot_traj;
+
+    // Compute first portion of trajectory
+    computeTrajectory(q1_traj, q2_traj, q3_traj, q4_traj, q5_traj, q6_traj,
+        q1_dot_traj, q2_dot_traj, q3_dot_traj, q4_dot_traj, q5_dot_traj, q6_dot_traj);
+
+    // Define lateral movement to push box laterally
+    KDL::Vector lateral(0.0, 0.2, 0.0);
+    p_desired.p += lateral;
+
+    // Update joint state for mid-waypoint position
+    for ( int i = 0; i < 6; i++ )
+    {
+        q_cur.data[i] = ip->CurrentPositionVector->VecData[i];
+    }
+
+    // Compute inverse kinematics to box position
+    ik_pos->CartToJnt(q_cur, p_desired, q_desired);
 
     // Set desired point of trajectory to the box position
     ip->TargetPositionVector->VecData[0] = q_desired.data[0];
@@ -202,7 +229,36 @@ void ur5_reflexxes_trajectory::generateSeedTrajectory()
         ip->TargetVelocityVector->VecData[i] = 0.0;
     }
 
-    computeTrajectory();
+    // Define kinematic limits
+    for ( int i = 0; i < 6; i++ )
+    {
+        ip->MaxVelocityVector->VecData[i] = 5.0;
+        ip->MaxAccelerationVector->VecData[i] = 50;
+        ip->MaxJerkVector->VecData[i] = 100;
+    }
+
+    // Compute second portion of trajectory
+    computeTrajectory(q1_traj, q2_traj, q3_traj, q4_traj, q5_traj, q6_traj,
+        q1_dot_traj, q2_dot_traj, q3_dot_traj, q4_dot_traj, q5_dot_traj, q6_dot_traj);
+
+    // Create trajectory message
+    ur5_box_msgs::ur5_trajectory trajectoryMsg;
+    trajectoryMsg.q1_trajectory = q1_traj;
+    trajectoryMsg.q2_trajectory = q2_traj;
+    trajectoryMsg.q3_trajectory = q3_traj;
+    trajectoryMsg.q4_trajectory = q4_traj;
+    trajectoryMsg.q5_trajectory = q5_traj;
+    trajectoryMsg.q6_trajectory = q6_traj;
+
+    trajectoryMsg.q1_dot_trajectory = q1_dot_traj;
+    trajectoryMsg.q2_dot_trajectory = q2_dot_traj;
+    trajectoryMsg.q3_dot_trajectory = q3_dot_traj;
+    trajectoryMsg.q4_dot_trajectory = q4_dot_traj;
+    trajectoryMsg.q5_dot_trajectory = q5_dot_traj;
+    trajectoryMsg.q6_dot_trajectory = q6_dot_traj;
+
+    // Publish trajectory
+    publishTrajectory(trajectoryMsg);
 }
 
 
@@ -216,14 +272,7 @@ void ur5_reflexxes_trajectory::TPoseTrajectory()
     ip->CurrentPositionVector->VecData[4] = joint_state.data[4];
     ip->CurrentPositionVector->VecData[5] = joint_state.data[5];
 
-    // Set desired point of trajectory to T-Pose
-    /*t_pose_coords.data[0] = 0.96;
-    t_pose_coords.data[1] = -1.04591;
-    t_pose_coords.data[2] = 1.11256 ;
-    t_pose_coords.data[3] = -0.0667037;
-    t_pose_coords.data[4] = 1.5708;
-    t_pose_coords.data[5] = -0.0506;*/
-
+    // Set desired point of trajectory to the T-Pose position
     ip->TargetPositionVector->VecData[0] = 0.0;
     ip->TargetPositionVector->VecData[1] = -1.04591;
     ip->TargetPositionVector->VecData[2] = 1.11256;
@@ -236,7 +285,51 @@ void ur5_reflexxes_trajectory::TPoseTrajectory()
         ip->TargetVelocityVector->VecData[i] = 0.0;
     }
 
-    computeTrajectory();
+    // Define kinematic limits
+    for ( int i = 0; i < 6; i++ )
+    {
+        ip->MaxVelocityVector->VecData[i] = 0.5;
+        ip->MaxAccelerationVector->VecData[i] = 0.75;
+        ip->MaxJerkVector->VecData[i] = 1.0;
+    }
+
+    // Declare trajectory variables
+    std_msgs::Float64MultiArray q1_traj;
+    std_msgs::Float64MultiArray q2_traj;
+    std_msgs::Float64MultiArray q3_traj;
+    std_msgs::Float64MultiArray q4_traj;
+    std_msgs::Float64MultiArray q5_traj;
+    std_msgs::Float64MultiArray q6_traj;
+
+    std_msgs::Float64MultiArray q1_dot_traj;
+    std_msgs::Float64MultiArray q2_dot_traj;
+    std_msgs::Float64MultiArray q3_dot_traj;
+    std_msgs::Float64MultiArray q4_dot_traj;
+    std_msgs::Float64MultiArray q5_dot_traj;
+    std_msgs::Float64MultiArray q6_dot_traj;
+
+    // Compute second portion of trajectory
+    computeTrajectory(q1_traj, q2_traj, q3_traj, q4_traj, q5_traj, q6_traj,
+        q1_dot_traj, q2_dot_traj, q3_dot_traj, q4_dot_traj, q5_dot_traj, q6_dot_traj);
+
+    // Create trajectory message
+    ur5_box_msgs::ur5_trajectory trajectoryMsg;
+    trajectoryMsg.q1_trajectory = q1_traj;
+    trajectoryMsg.q2_trajectory = q2_traj;
+    trajectoryMsg.q3_trajectory = q3_traj;
+    trajectoryMsg.q4_trajectory = q4_traj;
+    trajectoryMsg.q5_trajectory = q5_traj;
+    trajectoryMsg.q6_trajectory = q6_traj;
+
+    trajectoryMsg.q1_dot_trajectory = q1_dot_traj;
+    trajectoryMsg.q2_dot_trajectory = q2_dot_traj;
+    trajectoryMsg.q3_dot_trajectory = q3_dot_traj;
+    trajectoryMsg.q4_dot_trajectory = q4_dot_traj;
+    trajectoryMsg.q5_dot_trajectory = q5_dot_traj;
+    trajectoryMsg.q6_dot_trajectory = q6_dot_traj;
+
+    // Publish trajectory
+    publishTrajectory(trajectoryMsg);
 }
 
 

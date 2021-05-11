@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <ur5_box_msgs/ur5_trajectory.h>
 
 #include <kdl/jntarray.hpp>
 #include <kdl_parser/kdl_parser.hpp>
@@ -37,7 +39,15 @@ class ur5_reflexxes_trajectory {
 
         box_pos_subscriber box_pos_sub;
 
-        void computeTrajectory();
+        void computeTrajectory( std_msgs::Float64MultiArray& q1_traj, 
+            std_msgs::Float64MultiArray& q2_traj, std_msgs::Float64MultiArray& q3_traj, 
+            std_msgs::Float64MultiArray& q4_traj, std_msgs::Float64MultiArray& q5_traj, 
+            std_msgs::Float64MultiArray& q6_traj, std_msgs::Float64MultiArray& q1_dot_traj, 
+            std_msgs::Float64MultiArray& q2_dot_traj, std_msgs::Float64MultiArray& q3_dot_traj, 
+            std_msgs::Float64MultiArray& q4_dot_traj, std_msgs::Float64MultiArray& q5_dot_traj, 
+            std_msgs::Float64MultiArray& q6_dot_traj );
+
+        void publishTrajectory( ur5_box_msgs::ur5_trajectory trajectoryMsg );
 
     public:
 
