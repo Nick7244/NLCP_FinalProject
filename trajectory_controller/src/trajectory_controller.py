@@ -25,8 +25,8 @@ class TrajectoryControllerNode:
         self.ur5Calculator.Mq([0,0,0,0,0,0])
         self.ur5Calculator.Mq_g([0,0,0,0,0,0])
 
-        self.Ko = np.diag([5, 5, 5, 5, 5, 5])
-        self.K = np.diag([5, 5, 5, 5, 5, 5])
+        self.Ko = np.diag([1,1,1,1,1,1])
+        self.K = np.diag([1,1,1,1,1,1])
 
         self.joint_lookup = {'shoulder_pan_joint':'1', 'shoulder_lift_joint':'2', 'elbow_joint':'3', 
                              'wrist_1_joint':'4', 'wrist_2_joint':'5', 'wrist_3_joint':'6'}
