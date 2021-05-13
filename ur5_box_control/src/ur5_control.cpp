@@ -19,6 +19,7 @@
 ur5_control::ur5_control( const std::string& name ) 
     : TaskContext(name),
     port_cmd_jnt_pos("Commanded joint position"),
+    port_cmd_jnt_torque("Commanded joint torques"),
     trajectoryIteration(0),
     trajectoryLength(0),
     trajectoryReceived(false),
@@ -31,6 +32,9 @@ ur5_control::ur5_control( const std::string& name )
     // Create the joint state subscriber
     sub_js = nh.subscribe("/joint_states", 10, &ur5_control::jointStateCallback, this);
 
+    // Create the joint torques subscriber
+    sub_torques = nh.subscribe("/control_policy_torques", 10, &ur5_control::cmdTorqueCallback, this);
+
     // Initialize the internal joint state variable
     joint_state.resize(6);
     for (int i = 0; i < 6; i++)
@@ -38,7 +42,16 @@ ur5_control::ur5_control( const std::string& name )
         joint_state(i) = 0.0;
     }
 
+    // Initialize joint torques
+    cmd_Torques.data.resize(6);
+    
+    for ( int i = 0; i < 6; i++ )
+    {
+        cmd_Torques.data[i] = 0.0;
+    }
+
     addPort("CmdJntPos", port_cmd_jnt_pos);
+    addPort("CmdJntTorque", port_cmd_jnt_torque);
     addOperation("TPose", &ur5_control::TPose, this, RTT::OwnThread); 
     addOperation("GenerateTrajectory", &ur5_control::generateTrajectory, this, RTT::OwnThread); 
     addOperation("ExecuteTrajectory", &ur5_control::executeTrajectory, this, RTT::OwnThread);
@@ -88,7 +101,7 @@ bool ur5_control::startHook()
 
 void ur5_control::updateHook() 
 {
-    // If trajectory has been received
+    /*// If trajectory has been received
     if ( executeTrajectoryCmd )
     {
         // While we have not yet finished the trajectory
@@ -176,7 +189,9 @@ void ur5_control::updateHook()
             executeTrajectoryCmd = false;
             trajectoryIteration = 0;
         }
-    }    
+    } */
+
+    port_cmd_jnt_torque.write(cmd_Torques);
 }
 
 
@@ -249,6 +264,16 @@ void ur5_control::jointStateCallback(const sensor_msgs::JointState& js )
     float future2 = joint_state.data[0];
     joint_state.data[0] = future0;
     joint_state.data[2] = future2;
+}
+
+
+void ur5_control::cmdTorqueCallback( const sensor_msgs::JointState& torques )
+{
+    for ( int i = 0; i < 6; i++ )
+    {
+        cmd_Torques.data[i] = torques.effort[i];
+    }
+
 }
 
 

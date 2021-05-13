@@ -23,8 +23,11 @@ class ur5_control : public RTT::TaskContext {
         ros::NodeHandle nh;
         ros::Subscriber sub_traj;
         ros::Subscriber sub_js;
+        ros::Subscriber sub_torques;
 
         RTT::OutputPort<std_msgs::Float64MultiArray> port_cmd_jnt_pos;
+
+        RTT::OutputPort<std_msgs::Float64MultiArray> port_cmd_jnt_torque;
 
         int trajectoryIteration;
         int trajectoryLength;
@@ -45,6 +48,8 @@ class ur5_control : public RTT::TaskContext {
         ur5_box_msgs::ur5_trajectory jointTrajectory;
         
         KDL::JntArray joint_state;
+
+        std_msgs::Float64MultiArray cmd_Torques;
 
         ur5_reflexxes_trajectory* trajectorySeedGenerator;
 
@@ -68,5 +73,6 @@ class ur5_control : public RTT::TaskContext {
 
         void trajectoryCallback( const ur5_box_msgs::ur5_trajectory& trajectory );
         void jointStateCallback(const sensor_msgs::JointState& js );
+        void cmdTorqueCallback( const sensor_msgs::JointState& torques );
 
 };
