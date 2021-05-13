@@ -128,7 +128,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(box_plugin 
-  src/box_plugin.cpp
+  src/box_plugin_melodic.cpp
 )
 
 target_link_libraries(box_plugin 
