@@ -22,6 +22,7 @@ class ur5_control : public RTT::TaskContext {
 
         ros::NodeHandle nh;
         ros::Subscriber sub_traj;
+        ros::Subscriber sub_js;
 
         RTT::OutputPort<std_msgs::Float64MultiArray> port_cmd_jnt_pos;
 
@@ -30,11 +31,24 @@ class ur5_control : public RTT::TaskContext {
         bool trajectoryReceived;
         bool executeTrajectoryCmd;
 
+        bool pushTraj;
+
+        KDL::Tree tree;
+        KDL::Chain chain;
+        KDL::ChainFkSolverPos* fk_pos;
+        KDL::ChainFkSolverVel* fk_vel;
+        KDL::ChainIkSolverPos* ik_pos;
+        KDL::ChainIkSolverVel* ik_vel;
+
+        KDL::Rotation M;
+
         ur5_box_msgs::ur5_trajectory jointTrajectory;
         
         KDL::JntArray joint_state;
 
         ur5_reflexxes_trajectory* trajectorySeedGenerator;
+
+        void generateMatlab();
 
 
     public : 
@@ -53,5 +67,6 @@ class ur5_control : public RTT::TaskContext {
         void executeTrajectory();
 
         void trajectoryCallback( const ur5_box_msgs::ur5_trajectory& trajectory );
+        void jointStateCallback(const sensor_msgs::JointState& js );
 
 };

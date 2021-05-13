@@ -11,3 +11,10 @@ std_msgs/Float64MultiArray q3_dot_trajectory
 std_msgs/Float64MultiArray q4_dot_trajectory
 std_msgs/Float64MultiArray q5_dot_trajectory
 std_msgs/Float64MultiArray q6_dot_trajectory
+
+std_msgs/Float64MultiArray q1_dot_dot_trajectory
+std_msgs/Float64MultiArray q2_dot_dot_trajectory
+std_msgs/Float64MultiArray q3_dot_dot_trajectory
+std_msgs/Float64MultiArray q4_dot_dot_trajectory
+std_msgs/Float64MultiArray q5_dot_dot_trajectory
+std_msgs/Float64MultiArray q6_dot_dot_trajectory
