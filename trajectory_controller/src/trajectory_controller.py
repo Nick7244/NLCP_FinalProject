@@ -35,7 +35,7 @@ class TrajectoryControllerNode:
                            'vel':{'1':[], '2':[], '3':[], '4':[], '5':[], '6':[]},
                            'acc':{'1':[], '2':[], '3':[], '4':[], '5':[], '6':[]}}
         self.trajectory_len = 0
-        self.joint_state = {'pos':{'1':0.0, '2':0.0, '3':0.0, '4':0.0, '5':0.0, '6':0.0},
+        self.joint_state = {'pos':{'1':0.1, '2':0.0, '3':0.0, '4':0.0, '5':0.0, '6':0.0},
                             'vel':{'1':0.0, '2':0.0, '3':0.0, '4':0.0, '5':0.0, '6':0.0}}
 
         # State to maintain between executing trajectories
