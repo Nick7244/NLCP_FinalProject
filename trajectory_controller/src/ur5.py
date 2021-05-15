@@ -110,6 +110,83 @@ class robot_config:
 
         # transform matrix from origin to joint 0 reference frame
         # link 0 reference frame is the same as joint 0
+        # self.Torg0 = sp.Matrix([
+        #     [sp.cos(self.q[0] - sp.pi/2), -sp.sin(self.q[0] - sp.pi/2), 0, 0],
+        #     [sp.sin(self.q[0] - sp.pi/2), sp.cos(self.q[0] - sp.pi/2), 0, 0],
+        #     [0, 0, 1, L[0]],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 0 to joint 1 reference frame
+        # # link 1 reference frame is the same as joint 1
+        # self.T01 = sp.Matrix([
+        #     [1, 0, 0, -L[1]],
+        #     [0, sp.cos(-self.q[1] + sp.pi/2),
+        #      -sp.sin(-self.q[1] + sp.pi/2), 0],
+        #     [0, sp.sin(-self.q[1] + sp.pi/2),
+        #      sp.cos(-self.q[1] + sp.pi/2), 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 1 to joint 2 reference frame
+        # self.T12 = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, sp.cos(-self.q[2]),
+        #      -sp.sin(-self.q[2]), L[2]],
+        #     [0, sp.sin(-self.q[2]),
+        #      sp.cos(-self.q[2]), 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 1  to link 2
+        # self.T1l2 = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, sp.cos(-self.q[2]),
+        #      -sp.sin(-self.q[2]), L[2] / 2],
+        #     [0, sp.sin(-self.q[2]),
+        #      sp.cos(-self.q[2]), 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 2 to joint 3
+        # self.T23 = sp.Matrix([
+        #     [1, 0, 0, L[3]],
+        #     [0, sp.cos(-self.q[3] - sp.pi/2),
+        #      -sp.sin(-self.q[3] - sp.pi/2), L[4]],
+        #     [0, sp.sin(-self.q[3] - sp.pi/2),
+        #      sp.cos(-self.q[3] - sp.pi/2), 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 2 to link 3
+        # self.T2l3 = sp.Matrix([
+        #     [1, 0, 0, L[3]],
+        #     [0, sp.cos(-self.q[3] - sp.pi/2),
+        #      -sp.sin(-self.q[3] - sp.pi/2), L[4] / 2],
+        #     [0, sp.sin(-self.q[3] - sp.pi/2),
+        #      sp.cos(-self.q[3] - sp.pi/2), 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 3 to joint 4
+        # self.T34 = sp.Matrix([
+        #     [sp.sin(-self.q[4] - sp.pi/2),
+        #      sp.cos(-self.q[4] - sp.pi/2), 0, -L[5]],
+        #     [sp.cos(-self.q[4] - sp.pi/2),
+        #      -sp.sin(-self.q[4] - sp.pi/2), 0, 0],
+        #     [0, 0, 1, 0],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 4 to joint 5
+        # self.T45 = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, sp.cos(-self.q[5]), -sp.sin(-self.q[5]), 0],
+        #     [0, sp.sin(-self.q[5]), sp.cos(-self.q[5]), L[6]],
+        #     [0, 0, 0, 1]])
+
+        # # transform matrix from joint 5 to end-effector
+        # self.T5EE = sp.Matrix([
+        #     [1, 0, 0, L[7]],
+        #     [0, 1, 0, 0],
+        #     [0, 0, 1, 0],
+        #     [0, 0, 0, 1]])
+
+        # transform matrix from origin to joint 0 reference frame
+        # link 0 reference frame is the same as joint 0
         self.Torg0 = sp.Matrix([
             [sp.cos(self.q[0]), -sp.sin(self.q[0]), 0, 0],
             [sp.sin(self.q[0]), sp.cos(self.q[0]), 0, 0],
@@ -137,6 +214,11 @@ class robot_config:
             [0, 1, 0, -0.1197],
             [-sp.sin(-self.q[2]), 0, sp.cos(-self.q[2]), 0.425/2],
             [0, 0, 0, 1]])
+        # self.T1l2 = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, 1, 0, 0],
+        #     [0, 0, 1, 0.425/2],
+        #     [0, 0, 0, 1]])
 
         # transform matrix from joint 2 to joint 3
         self.T23 = sp.Matrix([
@@ -151,6 +233,11 @@ class robot_config:
             [0, 1, 0, 0],
             [-sp.cos(-self.q[3]), 0, -sp.sin(-self.q[3]), 0.39225/2],
             [0, 0, 0, 1]])
+        # self.T2l3 = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, 1, 0, 0],
+        #     [0, 0, 1, 0.39225/2],
+        #     [0, 0, 0, 1]])
 
         # transform matrix from joint 3 to joint 4
         self.T34 = sp.Matrix([
@@ -172,6 +259,11 @@ class robot_config:
             [-1, 0, 0, 0.0823],
             [0, 0, 1, 0],
             [0, 0, 0, 1]])
+        # self.T5EE = sp.Matrix([
+        #     [1, 0, 0, 0],
+        #     [0, 1, 0, 0.0823],
+        #     [0, 0, 1, 0],
+        #     [0, 0, 0, 1]])
 
         # orientation part of the Jacobian (compensating for angular velocity)
         kz = sp.Matrix([0, 0, 1])
