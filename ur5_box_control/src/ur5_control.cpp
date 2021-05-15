@@ -121,7 +121,7 @@ void ur5_control::updateHook()
                 std_msgs::Float64MultiArray js;
                 js.data.resize(6);
 
-                if ( pushTraj && trajectoryIteration < 40 )
+                /*if ( pushTraj && trajectoryIteration < 40 )
                 {
                     float x[47] = {0.6867, 0.6859, 0.6831, 0.6775, 0.6684,
                         0.6561, 0.6419, 0.6273, 0.6133, 0.6000, 0.5867, 0.5726,
@@ -166,14 +166,14 @@ void ur5_control::updateHook()
                 }
 
                 else
-                {
-                    js.data[0] = jointTrajectory.q1_trajectory.data[trajectoryIteration];
-                    js.data[1] = jointTrajectory.q2_trajectory.data[trajectoryIteration];
-                    js.data[2] = jointTrajectory.q3_trajectory.data[trajectoryIteration];
-                    js.data[3] = jointTrajectory.q4_trajectory.data[trajectoryIteration];
-                    js.data[4] = jointTrajectory.q5_trajectory.data[trajectoryIteration];
-                    js.data[5] = jointTrajectory.q6_trajectory.data[trajectoryIteration];
-                }
+                {*/
+                js.data[0] = jointTrajectory.q1_trajectory.data[trajectoryIteration];
+                js.data[1] = jointTrajectory.q2_trajectory.data[trajectoryIteration];
+                js.data[2] = jointTrajectory.q3_trajectory.data[trajectoryIteration];
+                js.data[3] = jointTrajectory.q4_trajectory.data[trajectoryIteration];
+                js.data[4] = jointTrajectory.q5_trajectory.data[trajectoryIteration];
+                js.data[5] = jointTrajectory.q6_trajectory.data[trajectoryIteration];
+                //}
                 
                 port_cmd_jnt_pos.write(js);
                 
@@ -245,8 +245,6 @@ void ur5_control::trajectoryCallback( const ur5_box_msgs::ur5_trajectory& trajec
 
     trajectoryReceived = true;
     trajectoryLength = trajectory.q1_trajectory.data.size();
-
-    trajectoryLength = 47;
     
     jointTrajectory = trajectory;
 }
