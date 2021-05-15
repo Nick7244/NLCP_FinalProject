@@ -7,28 +7,28 @@ function f = simulated_dynamics()
 
 
 % boundary conditions in state space
-x0 = [-5; -3; 0.5];
-xf = [0; 0; 1];
+x0 = [1; -1; 0.5; 1.1; -0.3; 1];
+xf = [3;  6;   7;   5;   -2; 3];
 T = 10;
 
-% %%%%%%%%% TRAJECTORY GENERATION %%%%%%%%%%%%%
-% 
-% % norm of initial and final velocity along desired path
-% % it determines how much the curves will bend
-% % and can be freely chosen
-% S.u1 = 1;
-% 
-% % boundary conditions in flat output space 
-% y0 = uni_h(x0);
-% yf = uni_h(xf);
-% dy0 = S.u1*[cos(x0(3)); sin(x0(3))]; % desired starting velocity
-% dyf = S.u1*[cos(xf(3)); sin(xf(3))]; % desired end velocity
-% 
-% % compute path coefficients
-% A = poly3_coeff(y0, dy0, yf, dyf, T);
-% 
-% % plot desired path
-% X = A*poly3([0:.01:T]);
+%%%%%%%%% TRAJECTORY GENERATION %%%%%%%%%%%%%
+
+% norm of initial and final velocity along desired path
+% it determines how much the curves will bend
+% and can be freely chosen
+S.u1 = 0;
+
+% boundary conditions in flat output space 
+y0 = uni_h(x0);
+yf = uni_h(xf);
+dy0 = S.u1*[0; 0; 0; 0; 0; 0]; % desired starting velocity
+dyf = S.u1*[0; 0; 0; 0; 0; 0]; % desired end velocity
+
+% compute path coefficients
+A = poly3_coeff(y0, dy0, yf, dyf, T);
+
+% plot desired path
+X = A*poly3([0:.01:T]);
 % plot(X(1,:), X(2,:), '-r')
 % hold on
 
@@ -37,7 +37,7 @@ S.dynamics.Mq([0, 0, 0, 0, 0, 0]);
 S.dynamics.Mq_g([0, 0, 0, 0, 0, 0]);
 
 %%%%%%%%% TRAJECTORY TRACKING %%%%%%%%%%%%%
-% S.A = A;
+S.A = A;
 
 % gains
 S.ko = [1, 0, 0, 0, 0, 0;
@@ -64,16 +64,72 @@ xa = [x];
 [ts, xas] = ode45(@uni_ode, [0 T], xa, [], S);
 
 % visualize
+figure;
 hold on;
-plot(ts, xas(:,1), '-r');
-plot(ts, xas(:,2), '-g');
-plot(ts, xas(:,3), '-b');
-plot(ts, xas(:,4), '-y');
-plot(ts, xas(:,5), '-m');
-plot(ts, xas(:,6), '-c');
+plot([0:0.01:T], X(1,:), '-g');
+plot(ts, xas(:,1), '-k');
+legend('desired', 'executed');
+title('Joint 1 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
 hold off;
 
-legend('desired', 'executed')
+figure;
+hold on;
+plot([0:0.01:T], X(2,:), '-g');
+plot(ts, xas(:,2), '-k');
+legend('desired', 'executed');
+title('Joint 2 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+hold off;
+
+figure;
+hold on;
+plot([0:0.01:T], X(3,:), '-g');
+plot(ts, xas(:,3), '-k');
+legend('desired', 'executed');
+title('Joint 3 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+hold off;
+
+figure;
+hold on;
+plot([0:0.01:T], X(4,:), '-g');
+plot(ts, xas(:,4), '-k');
+legend('desired', 'executed');
+title('Joint 4 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+hold off;
+
+figure;
+hold on;
+plot([0:0.01:T], X(5,:), '-g');
+plot(ts, xas(:,5), '-k');
+legend('desired', 'executed');
+title('Joint 5 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+hold off;
+
+figure;
+hold on;
+plot([0:0.01:T], X(6,:), '-g');
+plot(ts, xas(:,6), '-k');
+legend('desired', 'executed');
+title('Joint 6 Backstepping Control');
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+hold off;
+
+% plot(ts, xas(:,2), '-g');
+% plot(ts, xas(:,3), '-b');
+% plot(ts, xas(:,4), '-y');
+% plot(ts, xas(:,5), '-m');
+% plot(ts, xas(:,6), '-c');
+% hold off;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,7 +139,7 @@ function A = poly3_coeff(y0, dy0, yf, dyf, T)
 % computes cubic curve connecting (y0,dy0) and (yf, dyf) at time T
 
 Y = [y0, dy0, yf, dyf];
-L = [poly3(0), dpoly3(0), poly3(T), dpoly3(T)]
+L = [poly3(0), dpoly3(0), poly3(T), dpoly3(T)];
 A = Y*inv(L);
 
 
@@ -111,9 +167,12 @@ function ua = uni_ctrl(t, xa, S)
 % tracking control law
 
 % get desired outputs:
-yd = [1; 2; 3; 4; 5; 6];
-dyd = [0; 0; 0; 0; 0; 0];
-d2yd = [0; 0; 0; 0; 0; 0];
+% yd = [1; 2; 3; 4; 5; 6];
+% dyd = [0; 0; 0; 0; 0; 0];
+% d2yd = [0; 0; 0; 0; 0; 0];
+yd = S.A*poly3(t);
+dyd = S.A*dpoly3(t);
+d2yd = S.A*d2poly3(t);
 
 % get current output
 y = uni_h(xa);
