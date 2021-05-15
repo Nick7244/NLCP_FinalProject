@@ -101,97 +101,96 @@ bool ur5_control::startHook()
 
 void ur5_control::updateHook() 
 {
-    /*// If trajectory has been received
-    if ( executeTrajectoryCmd )
+    bool effort_control;
+    nh.param("/effort_control", effort_control, bool());
+
+    if ( effort_control )
     {
-        // While we have not yet finished the trajectory
-        if ( trajectoryIteration < trajectoryLength )
+        port_cmd_jnt_torque.write(cmd_Torques);
+    }
+
+    else
+    {
+        // If trajectory has been received
+        if ( executeTrajectoryCmd )
         {
-            // get the joint values and write them to the port
-            std_msgs::Float64MultiArray js;
-            js.data.resize(6);
-
-            if ( 0 ) //pushTraj && trajectoryIteration < 40 )
+            // While we have not yet finished the trajectory
+            if ( trajectoryIteration < trajectoryLength )
             {
-                float x[47] = {0.6867, 0.6860, 0.6837, 0.6786, 0.6702, 0.6585,
-                            0.6445, 0.6298, 0.6153, 0.6012, 0.5872, 0.5730, 0.5589,
-                            0.5452, 0.5313, 0.5170, 0.5025, 0.4881, 0.4739, 0.4597,
-                            0.4453, 0.4308, 0.4176, 0.4073, 0.4000, 0.3962, 0.3978,
-                            0.4038, 0.4104, 0.4160, 0.4209, 0.4273, 0.4351, 0.4415,
-                            0.4449, 0.4457, 0.4445, 0.4416, 0.4375, 0.4326, 0.4273,
-                            0.4221, 0.4171, 0.4120, 0.4069, 0.4022, 0.4000};
+                // get the joint values and write them to the port
+                std_msgs::Float64MultiArray js;
+                js.data.resize(6);
 
-                float y[47] = {0.1091, 0.1141, 0.1264, 0.1411, 0.1558, 0.1705,
-                            0.1852, 0.2000, 0.2147, 0.2294, 0.2441, 0.2588, 0.2735,
-                            0.2882, 0.3029, 0.3176, 0.3323, 0.3470, 0.3617, 0.3765,
-                            0.3912, 0.4059, 0.4206, 0.4353, 0.4500, 0.4646, 0.4791,
-                            0.4937, 0.5082, 0.5225, 0.5367, 0.5509, 0.5652, 0.5796,
-                            0.5942, 0.6089, 0.6236, 0.6382, 0.6525, 0.6665, 0.6806,
-                            0.6948, 0.7094, 0.7238, 0.7368, 0.7464, 0.7500};
+                if ( pushTraj && trajectoryIteration < 40 )
+                {
+                    float x[47] = {0.6867, 0.6859, 0.6831, 0.6775, 0.6684,
+                        0.6561, 0.6419, 0.6273, 0.6133, 0.6000, 0.5867, 0.5726,
+                        0.5579, 0.5434, 0.5289, 0.5144, 0.5001, 0.4863, 0.4727,
+                        0.4591, 0.4452, 0.4310, 0.4180, 0.4075, 0.4000, 0.3960,
+                        0.3975, 0.4034, 0.4101, 0.4157, 0.4207, 0.4271, 0.4350,
+                        0.4414, 0.4448, 0.4457, 0.4445, 0.4416, 0.4375, 0.4326,
+                        0.4273, 0.4221, 0.4171, 0.4120, 0.4069, 0.4022, 0.4000};
 
-                float z[47] = {0.3362, 0.3348, 0.3287, 0.3182, 0.3075, 0.2985, 
-                            0.2903, 0.2826, 0.2745, 0.2656, 0.2553, 0.2438, 0.2314, 
-                            0.2190, 0.2071, 0.1966, 0.1879, 0.1811, 0.1757, 0.1712,
-                            0.1670, 0.1623, 0.1563, 0.1504, 0.1500, 0.1571, 0.1674,
-                            0.1759, 0.1824, 0.1903, 0.2003, 0.2097, 0.2163, 0.2195,
-                            0.2200, 0.2182, 0.2144, 0.2092, 0.2028, 0.1958, 0.1888,
-                            0.1827, 0.1778, 0.1723, 0.1639, 0.1544, 0.1500};
+                    float y[47] = {0.1091, 0.1141, 0.1264, 0.1411, 0.1558,
+                        0.1705, 0.1853, 0.2000, 0.2147, 0.2294, 0.2441, 0.2588,
+                        0.2735, 0.2882, 0.3029, 0.3176, 0.3323, 0.3470, 0.3618,
+                        0.3765, 0.3912, 0.4059, 0.4206, 0.4353, 0.4500, 0.4645,
+                        0.4788, 0.4932, 0.5075, 0.5217, 0.5362, 0.5506, 0.5650,
+                        0.5795, 0.5941, 0.6088, 0.6235, 0.6382, 0.6528, 0.6673,
+                        0.6817, 0.6958, 0.7102, 0.7246, 0.7373, 0.7465, 0.7500};
 
+                    float z[47] = {0.3362, 0.3348, 0.3287, 0.3181, 0.3075,
+                        0.2984, 0.2902, 0.2824, 0.2744, 0.2654, 0.2552, 0.2437,
+                        0.2313, 0.2189, 0.2070, 0.1965, 0.1878, 0.1810, 0.1756,
+                        0.1711, 0.1668, 0.1622, 0.1562, 0.1503, 0.1500, 0.1572,
+                        0.1675, 0.1761, 0.1827, 0.1907, 0.2008, 0.2102, 0.2167,
+                        0.2200, 0.2205, 0.2187, 0.2149, 0.2097, 0.2033, 0.1962,
+                        0.1891, 0.1830, 0.1780, 0.1724, 0.1639, 0.1544, 0.1500};
 
-                KDL::Vector p(x[trajectoryIteration], y[trajectoryIteration], z[trajectoryIteration]);
+                    KDL::Vector p(x[trajectoryIteration], y[trajectoryIteration], z[trajectoryIteration]);
 
-                KDL::Frame frame;
-                frame.p = p;
-                frame.M = M;
+                    KDL::Frame frame;
+                    frame.p = p;
+                    frame.M = M;
 
-                KDL::JntArray q_cur = joint_state;
-                KDL::JntArray q_desired(6);
-                ik_pos->CartToJnt(q_cur, frame, q_desired);
+                    KDL::JntArray q_cur = joint_state;
+                    KDL::JntArray q_desired(6);
+                    ik_pos->CartToJnt(q_cur, frame, q_desired);
 
-                js.data[0] = q_desired.data[0];
-                js.data[1] = q_desired.data[1];
-                js.data[2] = q_desired.data[2];
-                js.data[3] = q_desired.data[3];
-                js.data[4] = q_desired.data[4];
-                js.data[5] = q_desired.data[5];
-            }
+                    js.data[0] = q_desired.data[0];
+                    js.data[1] = q_desired.data[1];
+                    js.data[2] = q_desired.data[2];
+                    js.data[3] = q_desired.data[3];
+                    js.data[4] = q_desired.data[4];
+                    js.data[5] = q_desired.data[5];
+                }
 
-            else
-            {
-                js.data[0] = jointTrajectory.q1_trajectory.data[trajectoryIteration];
-                js.data[1] = jointTrajectory.q2_trajectory.data[trajectoryIteration];
-                js.data[2] = jointTrajectory.q3_trajectory.data[trajectoryIteration];
-                js.data[3] = jointTrajectory.q4_trajectory.data[trajectoryIteration];
-                js.data[4] = jointTrajectory.q5_trajectory.data[trajectoryIteration];
-                js.data[5] = jointTrajectory.q6_trajectory.data[trajectoryIteration];
-            }
-            
-            
-            if ( abs(js.data[1]) < 3)
-            {
+                else
+                {
+                    js.data[0] = jointTrajectory.q1_trajectory.data[trajectoryIteration];
+                    js.data[1] = jointTrajectory.q2_trajectory.data[trajectoryIteration];
+                    js.data[2] = jointTrajectory.q3_trajectory.data[trajectoryIteration];
+                    js.data[3] = jointTrajectory.q4_trajectory.data[trajectoryIteration];
+                    js.data[4] = jointTrajectory.q5_trajectory.data[trajectoryIteration];
+                    js.data[5] = jointTrajectory.q6_trajectory.data[trajectoryIteration];
+                }
+                
                 port_cmd_jnt_pos.write(js);
+                
+                trajectoryIteration++;
             }
 
+            // Else, trajectory is finished, reset parameters
             else
             {
-                std::cout << "BAD ITERATION: " << trajectoryIteration << std::endl;
+                ROS_INFO("Trajectory completed!");
+
+                trajectoryReceived = false;
+                executeTrajectoryCmd = false;
+                trajectoryIteration = 0;
             }
-            
-            trajectoryIteration++;
         }
-
-        // Else, trajectory is finished, reset parameters
-        else
-        {
-            ROS_INFO("Trajectory completed!");
-
-            trajectoryReceived = false;
-            executeTrajectoryCmd = false;
-            trajectoryIteration = 0;
-        }
-    } */
-
-    port_cmd_jnt_torque.write(cmd_Torques);
+    }
 }
 
 
@@ -246,6 +245,8 @@ void ur5_control::trajectoryCallback( const ur5_box_msgs::ur5_trajectory& trajec
 
     trajectoryReceived = true;
     trajectoryLength = trajectory.q1_trajectory.data.size();
+
+    trajectoryLength = 47;
     
     jointTrajectory = trajectory;
 }

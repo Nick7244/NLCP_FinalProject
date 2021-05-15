@@ -3,6 +3,10 @@
   <arg name="limited" default="false"  doc="If true, limits joint range [-PI, PI] on all joints." />
   <arg name="paused" default="false" doc="Starts gazebo in paused mode" />
   <arg name="gui" default="true" doc="Starts gazebo gui" />
+  <arg name="effort_control" default="false"/>
+
+  <!-- set ROS param for type of controller (effort vs. position) -->
+  <param name="effort_control" value="$(arg effort_control)"/>
   
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -14,7 +18,8 @@
   <!-- send robot urdf to param server -->
   <include file="$(find ur_description)/launch/ur5_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
-    <arg name="transmission_hw_interface" value="hardware_interface/EffortJointInterface"/>
+    <arg if="$(arg effort_control)" name="transmission_hw_interface" value="hardware_interface/EffortJointInterface"/>
+    <arg unless="$(arg effort_control)" name="transmission_hw_interface" value="hardware_interface/PositionJointInterface"/>
   </include>
 
   <!-- spawn robot and table -->
@@ -29,7 +34,8 @@
 
   <!-- start this controller -->
   <rosparam file="$(find ur5_box_gazebo)/config/ur5_controllers.yaml" command="load"/>
-  <!--node name="joint_group_position_spawner" pkg="controller_manager" type="controller_manager" args="spawn joint_group_position_controller" respawn="false" output="screen"/-->
-  <node name="joint_effort_spawner" pkg="controller_manager" type="controller_manager" args="spawn joint_group_effort_controller" respawn="false" output="screen"/>
+  <node if="$(arg effort_control)" name="joint_effort_spawner" pkg="controller_manager" type="controller_manager" args="spawn joint_group_effort_controller" respawn="false" output="screen"/>
+  <node unless="$(arg effort_control)" name="joint_group_position_spawner" pkg="controller_manager" type="controller_manager" args="spawn joint_group_position_controller" respawn="false" output="screen"/>
+  
 
 </launch>
