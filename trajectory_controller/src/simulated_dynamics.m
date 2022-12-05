@@ -34,6 +34,7 @@ X = A*poly3([0:.01:T]);
 
 S.dynamics = py.ur5.robot_config('../data');
 S.dynamics.Mq([0, 0, 0, 0, 0, 0]);
+S.dynamics.Cq([0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]);
 S.dynamics.Mq_g([0, 0, 0, 0, 0, 0]);
 
 %%%%%%%%% TRAJECTORY TRACKING %%%%%%%%%%%%%
@@ -188,9 +189,10 @@ de = dy - dyd;
 z = S.ko*e + de;
 
 M = double(S.dynamics.Mq(y));
+C = double(S.dynamics.Cq(y, yd));
 g = double(S.dynamics.Mq_g(y))';
 
-ua = M*(d2yd - e - S.ko*de - S.k*z) + g;
+ua = M*(d2yd - e - S.ko*de - S.k*z) + C*dy + g;
 
 
 % augmented inputs ua=(du1, u2)
@@ -212,7 +214,10 @@ ua = uni_ctrl(t, xa, S);
 
 y = uni_h(xa);
 
+dy = xa(7:12)
+
 M = double(S.dynamics.Mq(y));
+C = double(S.dynamics.Cq(y, yd))
 g = double(S.dynamics.Mq_g(y))';
 
 dxa = [xa(7);
@@ -221,7 +226,7 @@ dxa = [xa(7);
        xa(10);
        xa(11);
        xa(12);
-       inv(M)*(ua - g)];
+       M\(ua - C*dy - g)];
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

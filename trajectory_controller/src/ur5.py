@@ -15,7 +15,7 @@ import cloudpickle
 import os
 import numpy as np
 import sympy as sp
-from sympy import init_printing
+from sympy import *
 
 class robot_config:
     """ A class to calculate all the transforms and Jacobians
@@ -43,7 +43,7 @@ class robot_config:
         # set up an (x,y,z) offset
         self.x = [sp.Symbol('x'), sp.Symbol('y'), sp.Symbol('z')]
 
-        self.gravity = sp.Matrix([[0, 0, -9.81, 0, 0, 0]]).T
+        self.gravity = sp.Matrix([[0, 0, 9.81, 0, 0, 0]]).T
 
         self.joint_names = ['UR5_joint%i' % ii
                             for ii in range(self.num_joints)]
@@ -299,15 +299,15 @@ class robot_config:
         parameters = tuple(q) + (0, 0, 0)
         return np.array(self._Mq(*parameters))
 
-    def Cq(self, q):
+    def Cq(self, q, q_dot):
         """ Calculates the joint space coriolis matrix for the ur5
         q np.array: joint angles
         """
         # check for function in dictionary
         if self._Cq is None:
             print('Generating coriolis matrix function')
-            self._Mq = self._calc_Cq()
-        parameters = tuple(q) + (0, 0, 0)
+            self._Cq = self._calc_Cq()
+        parameters = tuple(q) + tuple(q_dot) + (0, 0, 0)
         return np.array(self._Cq(*parameters))
 
     def Mq_g(self, q):
@@ -433,17 +433,28 @@ class robot_config:
 
         # check to see if we have our inertia matrix saved in file
         if os.path.isfile('%s/Cq' % self.config_folder):
-            Mq = cloudpickle.load(open('%s/Cq' % self.config_folder, 'rb'))
+            Cq = cloudpickle.load(open('%s/Cq' % self.config_folder, 'rb'))
         else:
-            # get the Jacobians for each link's COM
-            J = [self._calc_J('link%s' % ii, x=[0, 0, 0], lambdify=False)
-                 for ii in range(self.num_links)]
+            Mq = self._calc_Mq(lambdify=False)
 
-            # transform each inertia matrix into joint space
-            # sum together the effects of arm segments' inertia on each motor
-            Cq = sp.zeros(self.num_joints)
-            for ii in range(self.num_links):
-                Cq += J[ii].T * self._M[ii] * J[ii]
+            Cq = sp.zeros(self.num_joints, self.num_joints)
+            for ii in range(self.num_joints):
+                for jj in range(self.num_joints):
+                    sum = sp.Add(0)
+                    print(ii)
+                    print(jj)
+                    for kk in range(self.num_joints):
+                        print(kk)
+                        mq_ii_jj = Mq[ii, jj]
+                        mq_ii_kk = Mq[ii, kk]
+                        mq_kk_jj = Mq[kk, jj]
+                        sum =  sum + (mq_ii_jj.diff(self.q[kk]) + \
+                                    mq_ii_kk.diff(self.q[jj]) - \
+                                    mq_kk_jj.diff(self.q[ii]))*self.dq[kk]
+                    print("adding to matrix")
+                    Cq[ii, jj] = 0.5*sum
+
+            print("converting type")   
             Cq = sp.Matrix(Cq)
 
             # save to file
@@ -451,7 +462,7 @@ class robot_config:
 
         if lambdify is False:
             return Cq
-        return sp.lambdify(self.q + self.x, Cq)
+        return sp.lambdify(self.q + self.dq + self.x, Cq)
 
     def _calc_Mq_g(self, lambdify=True):
         """ Uses Sympy to generate the force of gravity in
@@ -466,15 +477,29 @@ class robot_config:
             Mq_g = cloudpickle.load(open('%s/Mq_g' % self.config_folder,
                                          'rb'))
         else:
-            # get the Jacobians for each link's COM
-            J = [self._calc_J('link%s' % ii, x=[0, 0, 0], lambdify=False)
+            # get the translation portion for each links COM
+            Tx = [self._calc_Tx('link%s' % ii, x=[0, 0, 0], lambdify=False)
                  for ii in range(self.num_links)]
 
             # transform each inertia matrix into joint space and
             # sum together the effects of arm segments' inertia on each motor
+          
+
+            Tx_00 = Tx[0]
+            shape = sp.shape(Tx_00)
+            P = sp.Matrix([[0],[0],[0],[0]])
+            for ii in range(self.num_joints):
+                mii = self._M[ii]
+                Tx_ii = Tx[ii]
+                print(type(Tx_ii))
+                print(type(Tx_ii[2] * mii[0, 0] * 9.81))
+                print(type(P))
+                P = P + Tx_ii[2] * mii[0, 0] * 9.81
+
             Mq_g = sp.zeros(self.num_joints, 1)
             for ii in range(self.num_joints):
-                Mq_g += J[ii].T * self._M[ii] * self.gravity
+                Mq_g = P.diff(self.q[ii])
+            
             Mq_g = sp.Matrix(Mq_g)
 
             # save to file
