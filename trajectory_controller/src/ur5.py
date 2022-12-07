@@ -306,7 +306,7 @@ class robot_config:
         # check for function in dictionary
         if self._Cq is None:
             print('Generating coriolis matrix function')
-            self._Cq = self._calc_Cq(lambdify=False)
+            self._Cq = self._calc_Cq() # may need to add lambdify=False here
         parameters = tuple(q) + tuple(q_dot) + (0, 0, 0)
         return np.array(self._Cq(*parameters))
 
@@ -489,9 +489,6 @@ class robot_config:
             for ii in range(self.num_joints):
                 mii = self._M[ii]
                 Tx_ii = Tx[ii]
-                print(type(Tx_ii))
-                print(type(Tx_ii[2] * mii[0, 0] * 9.81))
-                print(type(P))
                 P = P + Tx_ii[2] * mii[0, 0] * 9.81
 
             Mq_g = sp.zeros(self.num_joints, 1)
