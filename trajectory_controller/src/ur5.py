@@ -306,7 +306,7 @@ class robot_config:
         # check for function in dictionary
         if self._Cq is None:
             print('Generating coriolis matrix function')
-            self._Cq = self._calc_Cq()
+            self._Cq = self._calc_Cq(lambdify=False)
         parameters = tuple(q) + tuple(q_dot) + (0, 0, 0)
         return np.array(self._Cq(*parameters))
 
@@ -458,7 +458,7 @@ class robot_config:
             Cq = sp.Matrix(Cq)
 
             # save to file
-            cloudpickle.dump(Cq, open('%s/Mq' % self.config_folder, 'wb'))
+            cloudpickle.dump(Cq, open('%s/Cq' % self.config_folder, 'wb'))
 
         if lambdify is False:
             return Cq
@@ -485,9 +485,7 @@ class robot_config:
             # sum together the effects of arm segments' inertia on each motor
           
 
-            Tx_00 = Tx[0]
-            shape = sp.shape(Tx_00)
-            P = sp.Matrix([[0],[0],[0],[0]])
+            P = 0
             for ii in range(self.num_joints):
                 mii = self._M[ii]
                 Tx_ii = Tx[ii]
@@ -498,7 +496,7 @@ class robot_config:
 
             Mq_g = sp.zeros(self.num_joints, 1)
             for ii in range(self.num_joints):
-                Mq_g = P.diff(self.q[ii])
+                Mq_g[ii] = P.diff(self.q[ii])
             
             Mq_g = sp.Matrix(Mq_g)
 
